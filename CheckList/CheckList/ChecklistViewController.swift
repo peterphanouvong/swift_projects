@@ -20,6 +20,13 @@ class ChecklistViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.prefersLargeTitles = true //put a navbar
+        navigationItem.leftBarButtonItem = editButtonItem
+        tableView.allowsMultipleSelectionDuringEditing = true
+    }
+    
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: true)
+        tableView.setEditing(tableView.isEditing, animated: true)
     }
     
     // this tells you the number of rows
@@ -42,10 +49,12 @@ class ChecklistViewController: UITableViewController {
     
     // what to do when clicked
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if tableView.isEditing {return}
         if let cell = tableView.cellForRow(at: indexPath){
             let item = todoList.todos[indexPath.row]
             configureCheckmark(for: cell, with: item)
             tableView.deselectRow(at: indexPath, animated: true)
+            item.toggleChecked()
         }
     }
     
@@ -58,21 +67,40 @@ class ChecklistViewController: UITableViewController {
     }
     
     func configureText(for cell: UITableViewCell, with item: CheckListItem) {
-        if let label = cell.viewWithTag(1000) as? UILabel {
-            label.text = item.text
+        
+        if let checkmarkCell = cell as? ChecklistTableViewCell {
+            checkmarkCell.todoTextLabel.text = item.text
         }
     }
     
     func configureCheckmark(for cell: UITableViewCell, with item: CheckListItem) {
-        guard let checkmark = cell.viewWithTag(1001) as? UILabel else {
+        guard let checkmarkCell = cell as? ChecklistTableViewCell else {
             return
         }
         if item.checked {
-            checkmark.text = "√"
+            checkmarkCell.checkmarkLabel.text = "√"
         } else {
-            checkmark.text = ""
+            checkmarkCell.checkmarkLabel.text = ""
         }
-        item.toggleChecked()
+    }
+    
+    override func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        todoList.move(item: todoList.todos[sourceIndexPath.row], index: destinationIndexPath.row)
+        tableView.reloadData()
+    }
+    
+    @IBAction func deleteItems(_ sender: Any) {
+        if let selectedRows = tableView.indexPathsForSelectedRows {
+            var items = [CheckListItem]()
+            for indexPath in selectedRows {
+                items.append(todoList.todos[indexPath.row])
+            }
+            todoList.remove(items: items)
+            
+            tableView.beginUpdates()
+            tableView.deleteRows(at: selectedRows, with: .automatic)
+            tableView.endUpdates()
+        }
     }
     
     @IBAction func addItem() {
@@ -86,17 +114,17 @@ class ChecklistViewController: UITableViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         //get specific segue by checking the identifier
         if segue.identifier == "AddItemSegue" {
-            if let addItemViewController = segue.destination as? AddItemTableViewController {
-                addItemViewController.delegate = self
-                addItemViewController.todoList = todoList
+            if let ItemDetailViewController = segue.destination as? ItemDetailViewController {
+                ItemDetailViewController.delegate = self
+                ItemDetailViewController.todoList = todoList
             }
         }else if segue.identifier == "EditItemSegue" { // segue stuff: (2) get reference to destination, let stuff be equal to the destination properties
-            if let addItemViewController = segue.destination as? AddItemTableViewController {
+            if let ItemDetailViewController = segue.destination as? ItemDetailViewController {
                 if let cell = sender as? UITableViewCell,
                    let indexPath = tableView.indexPath(for: cell){ //sender is the cell which takes us to the segue
                     let item = todoList.todos[indexPath.row]
-                    addItemViewController.itemToEdit = item
-                    addItemViewController.delegate = self
+                    ItemDetailViewController.itemToEdit = item
+                    ItemDetailViewController.delegate = self
                 }
             }
         }
@@ -104,12 +132,12 @@ class ChecklistViewController: UITableViewController {
 }
 
 // Checklist View Controller must now conform to the protocol which we made
-extension ChecklistViewController: AddItemViewControllerDeligate {
-    func addItemViewControllerDidCancel(_ controller: AddItemTableViewController) {
+extension ChecklistViewController: ItemDetailViewControllerDelegate {
+    func ItemDetailViewControllerDidCancel(_ controller: ItemDetailViewController) {
         navigationController?.popViewController(animated: true)
     }
     
-    func addItemViewController(_ controller: AddItemTableViewController, didFinishAdding item: CheckListItem) {
+    func ItemDetailViewController(_ controller: ItemDetailViewController, didFinishAdding item: CheckListItem) {
         navigationController?.popViewController(animated: true)
         let rowIndex = todoList.todos.count - 1
         let indexPath = IndexPath(row: rowIndex, section: 0)
@@ -117,7 +145,7 @@ extension ChecklistViewController: AddItemViewControllerDeligate {
         tableView.insertRows(at: indexPaths, with: .automatic)
     }
     
-    func addItemViewController(_ controller: AddItemTableViewController, didFinishEditing item: CheckListItem) {
+    func ItemDetailViewController(_ controller: ItemDetailViewController, didFinishEditing item: CheckListItem) {
         if let index = todoList.todos.firstIndex(of: item) {
             let indexPath = IndexPath(row: index, section: 0)
             if let cell = tableView.cellForRow(at: indexPath){

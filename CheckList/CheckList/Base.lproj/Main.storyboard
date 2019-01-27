@@ -18,7 +18,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="detailDisclosureButton" indentationWidth="10" reuseIdentifier="ChecklistItem" id="sxZ-ns-RMj">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="detailDisclosureButton" indentationWidth="10" reuseIdentifier="ChecklistItem" id="sxZ-ns-RMj" customClass="ChecklistTableViewCell" customModule="CheckList" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="28" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="sxZ-ns-RMj" id="1X2-5x-K2o">
@@ -52,6 +52,8 @@
                                     </constraints>
                                 </tableViewCellContentView>
                                 <connections>
+                                    <outlet property="checkmarkLabel" destination="Z8W-2l-kpE" id="CSR-03-S2H"/>
+                                    <outlet property="todoTextLabel" destination="nLD-Zf-K7h" id="B8e-jf-vau"/>
                                     <segue destination="RIM-n4-p1q" kind="show" identifier="EditItemSegue" trigger="accessoryAction" id="TjC-Zj-CMh"/>
                                 </connections>
                             </tableViewCell>
@@ -62,11 +64,18 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Checklists" id="iZQ-Ma-yCu">
-                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="7VH-Mc-WHK">
-                            <connections>
-                                <segue destination="RIM-n4-p1q" kind="show" identifier="AddItemSegue" id="7PK-bx-zSF"/>
-                            </connections>
-                        </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem systemItem="add" id="7VH-Mc-WHK">
+                                <connections>
+                                    <segue destination="RIM-n4-p1q" kind="show" identifier="AddItemSegue" id="7PK-bx-zSF"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem title="Delete" id="LL3-tf-un2">
+                                <connections>
+                                    <action selector="deleteItems:" destination="pq8-IS-jBZ" id="HQu-dd-IgN"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
                     </navigationItem>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                 </tableViewController>
@@ -77,7 +86,7 @@
         <!--Title-->
         <scene sceneID="I1x-Kf-e7h">
             <objects>
-                <tableViewController id="RIM-n4-p1q" customClass="AddItemTableViewController" customModule="CheckList" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController id="RIM-n4-p1q" customClass="ItemDetailViewController" customModule="CheckList" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="K4B-Zc-g3d">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

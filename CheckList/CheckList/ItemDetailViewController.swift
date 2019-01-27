@@ -9,17 +9,17 @@
 import UIKit
 
 
-protocol AddItemViewControllerDeligate: class {
+protocol ItemDetailViewControllerDelegate: class {
     
-    func addItemViewControllerDidCancel(_ controller: AddItemTableViewController)
+    func ItemDetailViewControllerDidCancel(_ controller: ItemDetailViewController)
     // any ViewController that wants to get a new CheckListItem needs to implement this protocol, by creating a delegate in the class
-    func addItemViewController(_ controller: AddItemTableViewController, didFinishAdding item: CheckListItem)
-    func addItemViewController(_ controller: AddItemTableViewController, didFinishEditing item: CheckListItem)
+    func ItemDetailViewController(_ controller: ItemDetailViewController, didFinishAdding item: CheckListItem)
+    func ItemDetailViewController(_ controller: ItemDetailViewController, didFinishEditing item: CheckListItem)
 }
 
-class AddItemTableViewController: UITableViewController {
+class ItemDetailViewController: UITableViewController {
 
-    weak var delegate: AddItemViewControllerDeligate?
+    weak var delegate: ItemDetailViewControllerDelegate?
     // segue stuff: (1) create a properties in destination (self), this is what we will recieve from the previous view controller
     weak var todoList: TodoList?
     weak var itemToEdit: CheckListItem?
@@ -33,14 +33,14 @@ class AddItemTableViewController: UITableViewController {
         
         if let item = itemToEdit, let text = textField.text {
             item.text = text
-            delegate?.addItemViewController(self, didFinishEditing: item)
+            delegate?.ItemDetailViewController(self, didFinishEditing: item)
         } else {
             if let item = todoList?.newTodo(){
                 if let textFieldText = textField.text {
                     item.text = textFieldText
                 }
                 item.checked = false
-                delegate?.addItemViewController(self, didFinishAdding: item)
+                delegate?.ItemDetailViewController(self, didFinishAdding: item)
             }
         }
         
@@ -49,7 +49,7 @@ class AddItemTableViewController: UITableViewController {
          
     }
     @IBAction func cancel(_ sender: UIBarButtonItem) {
-        delegate?.addItemViewControllerDidCancel(self)
+        delegate?.ItemDetailViewControllerDidCancel(self)
     }
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,7 +71,7 @@ class AddItemTableViewController: UITableViewController {
 
 }
 
-extension AddItemTableViewController: UITextFieldDelegate {
+extension ItemDetailViewController: UITextFieldDelegate {
     //when u press done, remove the first response keyboard
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
